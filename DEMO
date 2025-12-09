@@ -1,0 +1,7 @@
+echo "# API" >> README.md 
+git init 
+git add README.md 
+git commit -m "primo commit" 
+git branch -M main 
+git remote add origin https://github.com/f65gw6yvpz-maker/API.git
+ git push -u origin main
