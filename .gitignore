@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+
+# Secrets / env
+.env
+*.env
+
+# Data files (do not commit training data)
+training_data.json
+chat_training.json
+
+# Logs
+*.log
+
+# SQLite / DB (if used in future)
+*.sqlite
+*.db
