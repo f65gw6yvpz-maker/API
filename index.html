@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Assistente CAPEX/OPEX</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+    }
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      border-right: 1px solid rgba(148, 163, 184, 0.3);
+      padding: 1.2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .app-title {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .app-title h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    .app-title span {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .api-block {
+      margin-top: 0.3rem;
+      padding: 0.6rem 0.7rem;
+      border-radius: 0.8rem;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.4);
+      font-size: 0.78rem;
+    }
+    .api-block label {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: #9ca3af;
+    }
+    .api-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.2rem;
+    }
+    .api-row input {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 0.35rem 0.6rem;
+      font-size: 0.75rem;
+    }
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+    .api-status {
+      margin-top: 0.3rem;
+      font-size: 0.72rem;
+    }
+    .nav {
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .nav-button {
+      border: none;
+      background: transparent;
+      color: #d1d5db;
+      text-align: left;
+      padding: 0.35rem 0.6rem;
+      border-radius: 0.6rem;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+    }
+    .nav-button span.icon {
+      font-size: 0.9rem;
+    }
+    .nav-button.active {
+      background: rgba(37,99,235,0.18);
+      color: #eff6ff;
+    }
+    .nav-button:hover {
+      background: rgba(15,23,42,0.9);
+    }
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 0.7rem;
+      color: #6b7280;
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      padding: 1.5rem 1.8rem 2rem;
+      background: radial-gradient(circle at top left, #0b1120, #020617);
+      overflow-y: auto;
+    }
+    .section {
+      display: none;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .section.active {
+      display: block;
+    }
+    .section h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      margin-bottom: 0.4rem;
+    }
+    .section-subtitle {
+      font-size: 0.82rem;
+      color: #9ca3af;
+      margin-bottom: 0.9rem;
+    }
+    .card {
+      background: rgba(15,23,42,0.95);
+      border-radius: 1rem;
+      padding: 0.9rem 1rem 1.1rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      margin-bottom: 0.8rem;
+      box-shadow: 0 18px 40px rgba(15,23,42,0.6);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 0.98rem;
+      margin-bottom: 0.25rem;
+    }
+    .card small {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    .card p, .card ul {
+      font-size: 0.8rem;
+      color: #d1d5db;
+      margin: 0.2rem 0;
+    }
+    .card ul {
+      padding-left: 1.1rem;
+    }
+    input[type="file"] {
+      margin-top: 0.3rem;
+      font-size: 0.8rem;
+      color: #e5e7eb;
+    }
+    .status {
+      font-size: 0.72rem;
+      margin-top: 0.35rem;
+      color: #9ca3af;
+    }
+
+    /* Chat */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .chat-window {
+      background: #020617;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(55,65,81,0.8);
+      padding: 0.6rem 0.7rem;
+      min-height: 180px;
+      max-height: 320px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+    }
+    .chat-message {
+      max-width: 80%;
+      margin-bottom: 0.4rem;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.8rem;
+      white-space: pre-wrap;
+    }
+    .chat-message.user {
+      margin-left: auto;
+      background: #1d4ed8;
+      color: #eff6ff;
+      border-bottom-right-radius: 0.2rem;
+    }
+    .chat-message.assistant {
+      margin-right: auto;
+      background: #111827;
+      color: #e5e7eb;
+      border-bottom-left-radius: 0.2rem;
+    }
+    .chat-message.system {
+      margin: 0.2rem auto;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 0.72rem;
+      text-align: center;
+    }
+    .chat-input-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+    textarea {
+      flex: 1;
+      border-radius: 0.7rem;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.8rem;
+      resize: vertical;
+      min-height: 60px;
+      max-height: 140px;
+      font-family: inherit;
+    }
+    .assistant-modes {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.78rem;
+      color: #d1d5db;
+      margin-bottom: 0.35rem;
+    }
+    .assistant-modes label {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      cursor: pointer;
+    }
+
+    /* Storici list */
+    .history-lists {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 0.8rem;
+    }
+    @media (max-width: 900px) {
+      .app-layout {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid rgba(148,163,184,0.3);
+      }
+      .history-lists {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+    .history-box {
+      background: #020617;
+      border-radius: 0.8rem;
+      border: 1px solid #374151;
+      padding: 0.6rem 0.7rem;
+      font-size: 0.78rem;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .history-item {
+      padding: 0.25rem 0;
+      border-bottom: 1px solid rgba(55,65,81,0.6);
+    }
+    .history-item:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="app-title">
+      <h1>Assistente CAPEX/OPEX</h1>
+      <span>Demo interna per API – sintesi interventi e classificazione guidata.</span>
+    </div>
+
+    <div class="api-block">
+      <label for="apiKeyInput">API key IA (Gemini / OpenAI)</label>
+      <div class="api-row">
+        <input type="password" id="apiKeyInput" placeholder="AI...">
+        <button class="btn btn-primary" id="saveKeyBtn">Salva</button>
+        <button class="btn" id="resetKeyBtn" style="background:#111827; color:#e5e7eb;">Reset</button>
+      </div>
+      <div class="api-status" id="keyStatus"></div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-button active" data-nav="overview">
+        <span class="icon">🏠</span> Panoramica
+      </button>
+      <button class="nav-button" data-nav="phase1">
+        <span class="icon">✏️</span> Fase 1 – Sintesi
+      </button>
+      <button class="nav-button" data-nav="train">
+        <span class="icon">📚</span> Addestramento CAPEX/OPEX
+      </button>
+      <button class="nav-button" data-nav="full">
+        <span class="icon">⚙️</span> Classificatore finale
+      </button>
+      <button class="nav-button" data-nav="assistant">
+        <span class="icon">🤖</span> Assistente IA
+      </button>
+      <button class="nav-button" data-nav="history">
+        <span class="icon">🗂️</span> Storico addestramento
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      Versione demo locale · I dati di addestramento sono salvati nei file JSON nella cartella Backend.
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- Panoramica -->
+    <section class="section active" data-section="overview">
+      <h2>Panoramica</h2>
+      <div class="section-subtitle">
+        Qui vedi il flusso completo: dal CSV grezzo fino alla classificazione CAPEX/OPEX automatizzata, con possibilità di intervenire e addestrare.
+      </div>
+      <div class="card">
+        <h3>Flusso di lavoro in tre passi</h3>
+        <ul>
+          <li><b>Fase 1 – Sintesi:</b> carichi il CSV grezzo, l’IA riscrive le descrizioni e assegna un livello di confidenza.</li>
+          <li><b>Addestramento CAPEX/OPEX:</b> su quelle sintesi l’umano indica CAPEX/OPEX e alimenta lo storico condiviso.</li>
+          <li><b>Classificatore finale:</b> i file successivi vengono sintetizzati e classificati automaticamente, con livelli di confidenza.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Assistente IA interno</h3>
+        <p>
+          Nella sezione <b>Assistente IA</b> puoi:
+        </p>
+        <ul>
+          <li>registrare note interne e regole aziendali (modalità <b>Addestramento</b>),</li>
+          <li>porre domande su interventi specifici (modalità <b>Risposta</b>), ottenendo anche una proposta di classificazione CAPEX/OPEX.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Fase 1 -->
+    <section class="section" data-section="phase1">
+      <h2>Fase 1 – Sintesi descrittiva</h2>
+      <div class="section-subtitle">
+        L’IA legge le descrizioni (Descrizione Riga, Descrizione Abb Riga, Note, Oggetto Lavori) e genera una
+        <b>Sintesi_intervento</b> e un <b>Livello_confidenza_descrizione</b> per ogni gruppo (Numero Oda + Oggetto Lavori).
+      </div>
+      <div class="card">
+        <h3>Carica CSV grezzo</h3>
+        <small>Input: CSV con separatore <code>;</code> · Output: stesso CSV con due colonne in più.</small>
+        <p>Seleziona un file CSV di iONE (o simile) e invialo al server per la riformulazione.</p>
+        <input type="file" id="phase1File" accept=".csv">
+        <div style="margin-top:0.4rem;">
+          <button class="btn btn-primary" id="phase1Btn">Invia al server</button>
+        </div>
+        <div class="status" id="phase1Status"></div>
+      </div>
+    </section>
+
+    <!-- Addestramento CAPEX/OPEX -->
+    <section class="section" data-section="train">
+      <h2>Addestramento CAPEX/OPEX</h2>
+      <div class="section-subtitle">
+        Usa i file con <b>Sintesi_intervento</b> già compilata e <b>Tipo_spesa</b> (CAPEX/OPEX) per allenare il classificatore interno.
+      </div>
+      <div class="card">
+        <h3>Carica file etichettato</h3>
+        <small>Input: CSV con Sintesi_intervento + Tipo_spesa · Lo storico è condiviso tra tutti gli utenti.</small>
+        <p>
+          Prendi un file uscito dalla Fase 1, aggiungi a mano la colonna <b>Tipo_spesa</b>, poi caricalo qui.
+          Ogni riga diventa un nuovo esempio di addestramento.
+        </p>
+        <input type="file" id="trainFile" accept=".csv">
+        <div style="margin-top:0.4rem;">
+          <button class="btn btn-primary" id="trainBtn">Invia al server</button>
+        </div>
+        <div class="status" id="trainStatus"></div>
+      </div>
+    </section>
+
+    <!-- Classificatore finale -->
+    <section class="section" data-section="full">
+      <h2>Classificatore finale</h2>
+      <div class="section-subtitle">
+        Sintesi + classificazione CAPEX/OPEX basate sia sul modello IA che sullo storico di addestramento interno.
+      </div>
+      <div class="card">
+        <h3>Carica CSV grezzo</h3>
+        <small>Input: CSV grezzo · Output: Sintesi_intervento + confidenze + Tipo_spesa_predetta.</small>
+        <p>
+          Il sistema:
+        </p>
+        <ul>
+          <li>riscrive le descrizioni di intervento,</li>
+          <li>calcola il livello di confidenza sulla comprensione,</li>
+          <li>usa lo storico per proporre CAPEX/OPEX e una confidenza di classificazione.</li>
+        </ul>
+        <input type="file" id="fullFile" accept=".csv">
+        <div style="margin-top:0.4rem;">
+          <button class="btn btn-primary" id="fullBtn">Invia al server</button>
+        </div>
+        <div class="status" id="fullStatus"></div>
+      </div>
+    </section>
+
+    <!-- Assistente IA -->
+    <section class="section" data-section="assistant">
+      <h2>Assistente IA</h2>
+      <div class="section-subtitle">
+        Modalità <b>Addestramento</b> per scrivere regole/linee guida; modalità <b>Risposta</b> per fare domande su interventi e CAPEX/OPEX.
+      </div>
+      <div class="card">
+        <h3>Chat tipo ChatGPT</h3>
+        <small>Le note di addestramento vengono salvate in chat_training.json; le risposte usano sia le note che il manuale e lo storico CAPEX/OPEX.</small>
+        <div class="chat-container">
+          <div class="assistant-modes">
+            <label>
+              <input type="radio" name="assistantMode" value="train" checked>
+              Addestramento (salva nota)
+            </label>
+            <label>
+              <input type="radio" name="assistantMode" value="answer">
+              Risposta (usa addestramento)
+            </label>
+          </div>
+
+          <div id="chatWindow" class="chat-window">
+            <!-- Messaggi della chat -->
+          </div>
+
+          <div class="chat-input-row">
+            <textarea id="assistantInput" placeholder="Scrivi una nota di addestramento o una domanda (es. 'La sostituzione completa delle pompe carburante rientra in CAPEX o OPEX?')"></textarea>
+            <button class="btn btn-primary" id="assistantBtn">Invia</button>
+          </div>
+          <div class="status" id="assistantStatus"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Storico -->
+    <section class="section" data-section="history">
+      <h2>Storico di addestramento</h2>
+      <div class="section-subtitle">
+        Qui puoi vedere cosa è stato memorizzato come storico CAPEX/OPEX e come note interne dell’assistente, e svuotare tutto se serve ripartire da zero.
+      </div>
+      <div class="card">
+        <h3>Storici attuali</h3>
+        <div class="history-lists">
+          <div>
+            <p><b>CAPEX/OPEX – esempi di classificazione</b></p>
+            <div style="display:flex; gap:0.4rem; margin-bottom:0.3rem;">
+              <button class="btn btn-primary" id="refreshTrainingBtn">Aggiorna elenco</button>
+              <button class="btn" id="clearTrainingBtn" style="background:#7f1d1d; color:#fee2e2;">Svuota</button>
+            </div>
+            <div id="trainingHistory" class="history-box">
+              <div class="history-item">Nessun dato caricato.</div>
+            </div>
+          </div>
+          <div>
+            <p><b>Note assistente – regole e contesto</b></p>
+            <div style="display:flex; gap:0.4rem; margin-bottom:0.3rem;">
+              <button class="btn btn-primary" id="refreshChatHistoryBtn">Aggiorna elenco</button>
+              <button class="btn" id="clearChatHistoryBtn" style="background:#7f1d1d; color:#fee2e2;">Svuota</button>
+            </div>
+            <div id="chatHistory" class="history-box">
+              <div class="history-item">Nessuna nota salvata.</div>
+            </div>
+          </div>
+        </div>
+        <div class="status" id="historyStatus"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const API_BASE = "http://127.0.0.1:8000";
+  const API_KEY_STORAGE_KEY = "capex_app_api_key";
+
+  // ====== GESTIONE API KEY ======
+  function getApiKey() {
+    return localStorage.getItem(API_KEY_STORAGE_KEY) || "";
+  }
+
+  function setApiKey(key) {
+    localStorage.setItem(API_KEY_STORAGE_KEY, key);
+  }
+
+  function loadApiKeyToUI() {
+    const input = document.getElementById("apiKeyInput");
+    const status = document.getElementById("keyStatus");
+    const key = getApiKey();
+    if (input) {
+      input.value = key;
+    }
+    if (status) {
+      if (key) {
+        status.textContent = "API key IA già presente per questo browser.";
+        status.style.color = "#4ade80";
+      } else {
+        status.textContent = "Inserisci e salva la tua API key IA (Gemini / OpenAI).";
+        status.style.color = "#f97316";
+      }
+    }
+  }
+
+  document.getElementById("saveKeyBtn").onclick = () => {
+    const input = document.getElementById("apiKeyInput");
+    const status = document.getElementById("keyStatus");
+    const key = (input.value || "").trim();
+    if (!key) {
+      status.textContent = "API key mancante.";
+      status.style.color = "#f97316";
+      return;
+    }
+    setApiKey(key);
+    status.textContent = "API key salvata su questo browser.";
+    status.style.color = "#4ade80";
+  };
+
+  document.getElementById("resetKeyBtn").onclick = () => {
+    localStorage.removeItem(API_KEY_STORAGE_KEY);
+    const input = document.getElementById("apiKeyInput");
+    const status = document.getElementById("keyStatus");
+    if (input) input.value = "";
+    if (status) {
+      status.textContent = "API key rimossa. Inseriscine una nuova.";
+      status.style.color = "#f97316";
+    }
+  };
+
+  window.addEventListener("load", () => {
+    loadApiKeyToUI();
+  });
+
+  // NAVIGAZIONE SEZIONI
+  function setActiveSection(name){
+    document.querySelectorAll(".nav-button").forEach(btn => {
+      if(btn.getAttribute("data-nav") === name){
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+    document.querySelectorAll(".section").forEach(sec => {
+      if(sec.getAttribute("data-section") === name){
+        sec.classList.add("active");
+      } else {
+        sec.classList.remove("active");
+      }
+    });
+  }
+
+  document.querySelectorAll(".nav-button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.getAttribute("data-nav");
+      setActiveSection(target);
+    });
+  });
+
+  async function sendFile(endpoint, file, needsApiKey=true){
+    const apiKey = getApiKey();
+    if(needsApiKey && !apiKey){
+      alert("Inserisci e salva prima la tua API key IA.");
+      return { ok:false, error:"API key mancante" };
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const headers = {};
+    if(needsApiKey){
+      headers["x-api-key"] = apiKey; // allineato con backend (x_api_key)
+    }
+
+    const res = await fetch(API_BASE + endpoint, {
+      method: "POST",
+      body: formData,
+      headers
+    });
+
+    if(!res.ok){
+      const text = await res.text();
+      throw new Error("Errore server: " + text);
+    }
+    return res;
+  }
+
+  // Fase 1
+  document.getElementById("phase1Btn").onclick = async () => {
+    const fileInput = document.getElementById("phase1File");
+    const status = document.getElementById("phase1Status");
+    if(!fileInput.files[0]){
+      status.textContent = "Seleziona un file CSV.";
+      status.style.color = "#fca5a5";
+      return;
+    }
+    status.textContent = "Invio al server...";
+    status.style.color = "#9ca3af";
+    try{
+      const res = await sendFile("/phase1_sintesi", fileInput.files[0], true);
+      const text = await res.text();
+      const blob = new Blob([text], {type:"text/csv;charset=utf-8;"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileInput.files[0].name.replace(/\.csv$/i,"") + "_fase1.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      status.textContent = "File ricevuto e scaricato.";
+      status.style.color = "#4ade80";
+    }catch(e){
+      status.textContent = "Errore: " + e.message;
+      status.style.color = "#fca5a5";
+    }
+  };
+
+  // Train CAPEX/OPEX
+  document.getElementById("trainBtn").onclick = async () => {
+    const fileInput = document.getElementById("trainFile");
+    const status = document.getElementById("trainStatus");
+    if(!fileInput.files[0]){
+      status.textContent = "Seleziona un file CSV.";
+      status.style.color = "#fca5a5";
+      return;
+    }
+    status.textContent = "Invio file di addestramento...";
+    status.style.color = "#9ca3af";
+    try{
+      const res = await sendFile("/train", fileInput.files[0], false);
+      const data = await res.json();
+      status.textContent = `Esempi aggiunti: ${data.aggiunti} – Totale storico: ${data.totale}`;
+      status.style.color = "#4ade80";
+    }catch(e){
+      status.textContent = "Errore: " + e.message;
+      status.style.color = "#fca5a5";
+    }
+  };
+
+  // Full classify
+  document.getElementById("fullBtn").onclick = async () => {
+    const fileInput = document.getElementById("fullFile");
+    const status = document.getElementById("fullStatus");
+    if(!fileInput.files[0]){
+      status.textContent = "Seleziona un file CSV.";
+      status.style.color = "#fca5a5";
+      return;
+    }
+    status.textContent = "Invio al server...";
+    status.style.color = "#9ca3af";
+    try{
+      const res = await sendFile("/full_classify", fileInput.files[0], true);
+      const text = await res.text();
+      const blob = new Blob([text], {type:"text/csv;charset=utf-8;"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileInput.files[0].name.replace(/\.csv$/i,"") + "_classificato.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      status.textContent = "File ricevuto e scaricato.";
+      status.style.color = "#4ade80";
+    }catch(e){
+      status.textContent = "Errore: " + e.message;
+      status.style.color = "#fca5a5";
+    }
+  };
+
+  // CHAT
+  const chatWindow = document.getElementById("chatWindow");
+  function addChatMessage(role, text){
+    const div = document.createElement("div");
+    div.classList.add("chat-message", role);
+    div.textContent = text;
+    chatWindow.appendChild(div);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
+  document.getElementById("assistantBtn").onclick = async () => {
+    const mode = document.querySelector('input[name="assistantMode"]:checked').value;
+    const text = document.getElementById("assistantInput").value.trim();
+    const status = document.getElementById("assistantStatus");
+    if(!text){
+      status.textContent = "Scrivi qualcosa prima di inviare.";
+      status.style.color = "#fca5a5";
+      return;
+    }
+    const apiKey = getApiKey();
+    if(mode === "answer" && !apiKey){
+      alert("Inserisci e salva prima la tua API key IA.");
+      return;
+    }
+
+    status.textContent = mode === "train" ? "Salvo la nota di addestramento..." : "Invio la domanda all’assistente...";
+    status.style.color = "#9ca3af";
+
+    if(mode === "train"){
+      // Nota di addestramento
+      try {
+        const res = await fetch(API_BASE + "/chat_train", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text })
+        });
+        if(!res.ok){
+          const t = await res.text();
+          throw new Error(t);
+        }
+        const data = await res.json();
+        addChatMessage("system", `Nota di addestramento salvata (totale: ${data.totale_note}).`);
+        document.getElementById("assistantInput").value = "";
+        status.textContent = "Nota registrata.";
+        status.style.color = "#4ade80";
+      } catch(e){
+        status.textContent = "Errore: " + e.message;
+        status.style.color = "#fca5a5";
+      }
+    } else {
+      // Chat di risposta
+      addChatMessage("user", text);
+      document.getElementById("assistantInput").value = "";
+      try {
+        const res = await fetch(API_BASE + "/chat_answer", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey
+          },
+          body: JSON.stringify({ question: text })
+        });
+        if(!res.ok){
+          const t = await res.text();
+          throw new Error(t);
+        }
+        const data = await res.json();
+        addChatMessage("assistant", data.answer || "");
+        status.textContent = "Risposta ricevuta.";
+        status.style.color = "#4ade80";
+      } catch(e){
+        addChatMessage("system", "Errore di comunicazione con l'assistente.");
+        status.textContent = "Errore: " + e.message;
+        status.style.color = "#fca5a5";
+      }
+    }
+  };
+
+  // STORICI
+  async function loadTrainingHistory(){
+    const box = document.getElementById("trainingHistory");
+    box.innerHTML = "<div class='history-item'>Caricamento...</div>";
+    const res = await fetch(API_BASE + "/training_list");
+    if(!res.ok){
+      const t = await res.text();
+      box.innerHTML = "<div class='history-item'>Errore: " + t + "</div>";
+      return;
+    }
+    const data = await res.json();
+    const list = data.data || [];
+    if(!list.length){
+      box.innerHTML = "<div class='history-item'>Nessun dato di addestramento CAPEX/OPEX.</div>";
+      return;
+    }
+    box.innerHTML = "";
+    list.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.classList.add("history-item");
+      const sint = (item.sintesi || "").slice(0, 140);
+      div.textContent = `#${idx+1} [${item.label}] ${sint}${item.sintesi && item.sintesi.length>140 ? "..." : ""}`;
+      box.appendChild(div);
+    });
+  }
+
+  async function loadChatHistory(){
+    const box = document.getElementById("chatHistory");
+    box.innerHTML = "<div class='history-item'>Caricamento...</div>";
+    const res = await fetch(API_BASE + "/chat_training_list");
+    if(!res.ok){
+      const t = await res.text();
+      box.innerHTML = "<div class='history-item'>Errore: " + t + "</div>";
+      return;
+    }
+    const data = await res.json();
+    const list = data.data || [];
+    if(!list.length){
+      box.innerHTML = "<div class='history-item'>Nessuna nota di addestramento.</div>";
+      return;
+    }
+    box.innerHTML = "";
+    list.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.classList.add("history-item");
+      const msg = (item.message || "").slice(0, 160);
+      div.textContent = `#${idx+1} ${msg}${item.message && item.message.length>160 ? "..." : ""}`;
+      box.appendChild(div);
+    });
+  }
+
+  document.getElementById("refreshTrainingBtn").onclick = () => {
+    loadTrainingHistory().catch(console.error);
+  };
+  document.getElementById("refreshChatHistoryBtn").onclick = () => {
+    loadChatHistory().catch(console.error);
+  };
+
+  document.getElementById("clearTrainingBtn").onclick = async () => {
+    if(!confirm("Sei sicuro di voler svuotare completamente lo storico CAPEX/OPEX?")) return;
+    const status = document.getElementById("historyStatus");
+    status.textContent = "Svuoto storico CAPEX/OPEX...";
+    status.style.color = "#9ca3af";
+    try{
+      const res = await fetch(API_BASE + "/training_clear", { method: "POST" });
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t);
+      }
+      await loadTrainingHistory();
+      status.textContent = "Storico CAPEX/OPEX svuotato.";
+      status.style.color = "#4ade80";
+    }catch(e){
+      status.textContent = "Errore: " + e.message;
+      status.style.color = "#fca5a5";
+    }
+  };
+
+  document.getElementById("clearChatHistoryBtn").onclick = async () => {
+    if(!confirm("Sei sicuro di voler svuotare tutte le note dell'assistente?")) return;
+    const status = document.getElementById("historyStatus");
+    status.textContent = "Svuoto storico note assistente...";
+    status.style.color = "#9ca3af";
+    try{
+      const res = await fetch(API_BASE + "/chat_training_clear", { method: "POST" });
+      if(!res.ok){
+        const t = await res.text();
+        throw new Error(t);
+      }
+      await loadChatHistory();
+      status.textContent = "Storico note svuotato.";
+      status.style.color = "#4ade80";
+    }catch(e){
+      status.textContent = "Errore: " + e.message;
+      status.style.color = "#fca5a5";
+    }
+  };
+
+  // Carica storici quando entri nella sezione "Storico"
+  document.querySelector('[data-nav="history"]').addEventListener("click", () => {
+    loadTrainingHistory().catch(console.error);
+    loadChatHistory().catch(console.error);
+  });
+</script>
+</body>
+</html>

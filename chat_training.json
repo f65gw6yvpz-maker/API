@@ -1,0 +1,14 @@
+[
+  {
+    "message": "REGOLE GENERALI CAPEX/OPEX GRUPPO API\n\nCAPEX: interventi straordinari, che aumentano o migliorano l’impianto (nuove installazioni, adeguamenti normativi strutturali, sostituzioni importanti di attrezzature, lavori su fabbricati o piazzali, investimenti in sicurezza/tecnologia).\n\nOPEX: manutenzione ordinaria, piccole riparazioni, interventi di routine, spese amministrative ricorrenti, attività che non aumentano la capacità o la vita utile dell’impianto.\n\nQuando ci sono soglie di importo (es. 2.000 € o 4.000 €), sotto soglia tende a essere OPEX, sopra soglia CAPEX, salvo casi particolari."
+  },
+  {
+    "message": "REGOLE SPECIFICHE GRUPPO API – RIAPERTURE, IMPERMEABILIZZAZIONI, FASCIONI, PIAZZALI\n\nRiapertura punti vendita\n\nManutenzione ordinaria (serrature non CENCON, pulizia serbatoi, semplici riattivazioni): OPEX.\n\nManutenzione straordinaria, sostituzione attrezzature, adeguamenti normativi, cambio modalità di vendita, lavori su fabbricati: CAPEX.\n\nImpermeabilizzazioni (chioschi, fabbricati, pensiline)\n\nImporto < 2.000 €: OPEX.\n\nImporto > 2.000 €: CAPEX, includendo anche permitting e materiali.\n\nFascioni (chioschi, pensiline, fabbricati)\n\nImporto < 2.000 €: OPEX.\n\nImporto > 2.000 €: CAPEX, includendo permitting e materiali.\n\nPiazzali, pavimentazioni, griglie\n\nImporto < 4.000 €: OPEX.\n\nImporto > 4.000 €: CAPEX, includendo permitting e materiali."
+  },
+  {
+    "message": "5. Verniciature\n\nSola verniciatura senza opere edili: OPEX.\n\nVerniciatura con opere edili strutturali: CAPEX.\n\nImpianto elettrico (I.E.)\n\nManutenzione o sostituzione di prese/interruttori, attività ordinarie: OPEX.\n\nRifacimento di linee, adeguamenti normativi, manutenzione straordinaria dell’impianto elettrico: CAPEX.\n\nComponenti impiantistici specifici (CAPEX)\n\nTipicamente CAPEX: kit differenziale servito, prezzari manuali, sonde di livello, chiusini PDU, condizionatori.\n\nAttrezzature tecnologiche e sicurezza (CAPEX)\n\nTipicamente CAPEX: schede CPU, Smart Box/Smart Opt/Ubox, UPS, convertitori di protocollo, testate erogatori, serrature CENCON, sistemi recupero vapori, lettori banconote, motori serrande.\n\nIlluminazione e immagine\n\nSostituzione di un faro LED esistente sulla pensilina: normalmente OPEX.\n\nSostituzione dei pali di illuminazione del piazzale: CAPEX.\n\nFornitura o ripristino adesivi e immagine: di norma OPEX.\n\nVarie amministrative e tecniche\n\nCollaudi decennali/quindicennali: CAPEX.\n\nVolture: OPEX.\n\nRinnovo CPI: CAPEX."
+  },
+  {
+    "message": "chiusini pdu 2345"
+  }
+]
