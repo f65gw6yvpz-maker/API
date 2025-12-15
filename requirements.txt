@@ -3,3 +3,5 @@ uvicorn[standard]
 requests
 filelock
 pydantic
+google-generativeai
+python-multipart
